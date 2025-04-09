@@ -3,29 +3,31 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-type RouteContext = {
+interface RouteParams {
     params: {
-        id: string
+        id: string;
+    };
+}
+
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+    try {
+        const todo = await prisma.todo.update({
+            where: { id: parseInt(params.id) },
+            data: { completed: true },
+        });
+        return NextResponse.json(todo);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to update todo' }, { status: 500 });
     }
 }
 
-export async function PATCH(req: NextRequest, { params }: RouteContext) {
-    if (!params.id) {
-        return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+    try {
+        await prisma.todo.delete({
+            where: { id: parseInt(params.id) }
+        });
+        return NextResponse.json({ message: 'Deleted' });
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to delete todo' }, { status: 500 });
     }
-    
-    const todo = await prisma.todo.update({
-        where: { id: Number(params.id) },
-        data: { completed: true },
-    });
-    return NextResponse.json(todo);
-}
-
-export async function DELETE(req: NextRequest, { params }: RouteContext) {
-    if (!params.id) {
-        return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
-    }
-
-    await prisma.todo.delete({ where: { id: Number(params.id) } });
-    return NextResponse.json({ message: 'Deleted' });
 }
