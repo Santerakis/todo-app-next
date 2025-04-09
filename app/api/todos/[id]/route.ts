@@ -3,13 +3,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-interface RouteParams {
-    params: {
-        id: string;
-    };
-}
+export const dynamic = 'force-dynamic';
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+): Promise<Response> {
     try {
         const todo = await prisma.todo.update({
             where: { id: parseInt(params.id) },
@@ -21,7 +20,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+): Promise<Response> {
     try {
         await prisma.todo.delete({
             where: { id: parseInt(params.id) }
